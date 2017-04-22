@@ -23,7 +23,7 @@ public class Client {
 	public static void main(String[] args){
 
 		String host = "localhost";
-		int port = 9002;
+		int port = 9000;
 
 		String word ;
 		int choice =1;
@@ -36,34 +36,38 @@ public class Client {
 			if(choice==1){
 				System.out.println("Enter a Word : 1");
 				word = sc.next();
+				word= word.trim();
 				System.out.println("USer entered "+ word);
 				String targeturl="";
 
 				try{
 
 					TTransport transport;
-	  		        transport = new TSocket(host, port);
-	  		        transport.open();
-	  		        TProtocol protocol = new  TBinaryProtocol(transport);
-	  				AddService.Client client = new AddService.Client(protocol);
+	  		  transport = new TSocket(host, port);
+	  		  transport.open();
+	  		  TProtocol protocol = new  TBinaryProtocol(transport);
+	  			AddService.Client client = new AddService.Client(protocol);
 
-	  				targeturl = client.find_node(getHashcode(word) , true);
+	  			targeturl = client.find_node(getHashcode(word) , true);
+					transport.close();
 				}
 				catch(TException e){
 
 				}
 
-  				String targetHost = targeturl.split(":")[0];
+				System.out.println("Received target storage node as "+ targeturl);
+  			String targetHost = targeturl.split(":")[0];
 				int targetPort = Integer.parseInt(targeturl.split(":")[1].split("/")[0]);
 
 				try{
 					TTransport transport2;
-	  		        transport2 = new TSocket(targetHost, targetPort);
-	  		        transport2.open();
-	  		        TProtocol protocol2 = new  TBinaryProtocol(transport2);
-	  				AddService.Client client2 = new AddService.Client(protocol2);
-	  				String meaning = client2.lookup(word);
-	  				System.out.println(" Result : "+ meaning);
+	  		  transport2 = new TSocket(targetHost, targetPort);
+	  		  transport2.open();
+	  		  TProtocol protocol2 = new  TBinaryProtocol(transport2);
+	  			AddService.Client client2 = new AddService.Client(protocol2);
+	  			String meaning = client2.lookup(word);
+	  			System.out.println("Result : "+ meaning);
+					transport2.close();
 
 				}
 				catch(TException e ){

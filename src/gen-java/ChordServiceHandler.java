@@ -47,6 +47,7 @@ class ChordServiceHandler implements AddService.Iface
 
 	public String lookup (String word){
 		int wordkey = getHashcode(word);
+		System.out.println("Looking up word "+word+" witih key "+wordkey);
 		if(wordMap.containsKey(wordkey)){
 			return wordMap.get(wordkey);
 		}
@@ -71,6 +72,7 @@ class ChordServiceHandler implements AddService.Iface
 	public boolean insert (String word, String meaning){
 		int wordkey = getHashcode(word); //word.hashCode();
 		this.wordMap.put(wordkey, meaning);
+		System.out.println("Word "+ word +" with key "+wordkey+" inserted ");
 		return true;
 	}
 
@@ -89,8 +91,8 @@ class ChordServiceHandler implements AddService.Iface
 		this.successor = null;
 		this.port = tport;
 		this.hostName = host;
-	   	wordMap  = new HashMap<Integer,String>();
-		fingerTable = new HashMap<Integer,Node>();
+	  this.wordMap  = new HashMap<Integer,String>();
+		this.fingerTable = new HashMap<Integer,Node>();
 
 		try {
 			fw=new PrintWriter("Node"+nodeID+"LogFile");
