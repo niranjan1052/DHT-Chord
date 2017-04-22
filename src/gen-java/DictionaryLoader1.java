@@ -40,6 +40,9 @@ public class DictionaryLoader1 {
 			int k =1;
 			String host = "localhost";
 			int port = 9000;
+
+		 //	int[] arr = {1180446335, 1180447000, 1180448000, 1180445880, 1180448200,1180446335, 1180447000, 1180447500, 1180446800, 1180448200,1180448000 };
+      int t=0;
 			while ((line = br.readLine()) != null) {
 			StringTokenizer st = new StringTokenizer(line,":");
 			word = st.nextToken();
@@ -47,35 +50,37 @@ public class DictionaryLoader1 {
 			meaning = st.nextToken();
 			meaning = meaning.trim();
 			dictionary.put(word, meaning);
-				// using dictionary we may loose duplicate entries  or may be thats fine
-				//as it would have same effect on server side as well
+			// using dictionary we may loose duplicate entries  or may be thats fine
+			//as it would have same effect on server side as well
 			//	System.out.println(word+" ---------- "+ meaning);
 
 
 
-				TTransport transport;
-  		  transport = new TSocket(host, port);
-  		  transport.open();
-  		  TProtocol protocol = new  TBinaryProtocol(transport);
-  			AddService.Client client = new AddService.Client(protocol);
-				String targeturl = client.find_node(getHashcode(word) , true);
+			TTransport transport;
+  	  transport = new TSocket(host, port);
+  	  transport.open();
+		  TProtocol protocol = new  TBinaryProtocol(transport);  			AddService.Client client = new AddService.Client(protocol);
+			String targeturl = client.find_node(getHashcode(word) , true);
 
-		   //		System.out.println("received targetURL as "+ targeturl);
+			//String targeturl = client.find_node(arr[t],true);
+		//	t= (t+1)%10;
 
-				String targetHost = targeturl.split(":")[0];
-				int targetPort = Integer.parseInt(targeturl.split(":")[1].split("/")[0]);
+		    //		System.out.println("received targetURL as "+ targeturl);
 
-				System.out.println("received targetURL as details are "+ targetHost+"  : "+ targetPort);
-				transport.close();
+			String targetHost = targeturl.split(":")[0];
+			int targetPort = Integer.parseInt(targeturl.split(":")[1].split("/")[0]);
+
+			System.out.println("for word "+word+" received targetURL "+ targetHost+"  : "+ targetPort+ "for key  "+ getHashcode(word));
+			transport.close();
 
 
-				TTransport transport2;
-  		  transport2 = new TSocket(targetHost, targetPort);
-  		  transport2.open();
-  		  TProtocol protocol2 = new  TBinaryProtocol(transport2);
-  			AddService.Client client2 = new AddService.Client(protocol2);
-  			client2.insert(word, meaning);
-				transport2.close();
+			TTransport transport2;
+  	  transport2 = new TSocket(targetHost, targetPort);
+  	  transport2.open();
+  	  TProtocol protocol2 = new  TBinaryProtocol(transport2);
+  		AddService.Client client2 = new AddService.Client(protocol2);
+  		client2.insert(word, meaning);
+			transport2.close();
 			}
 
 			br.close();
