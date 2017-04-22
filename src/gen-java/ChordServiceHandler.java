@@ -62,7 +62,6 @@ class ChordServiceHandler implements AddService.Iface
 			key = key >>>1;
 		}
 		return key;
-
 	}
 
 	public void setHashedKey(int id){
@@ -140,89 +139,11 @@ class ChordServiceHandler implements AddService.Iface
 		this.predecessor = node;
 	}
 
-
-
-	public void updateOthers(Node n){
-		for (int i =1 ;i<=	keyLength;i++){
-			//this could be parallelized by using other node to call find_predecessor
-			Node p = this.find_predecessor((n.getKey()- (((int)Math.pow(2,i-1))%maxkeyval)));
-
-      if(p.getKey()==this.hashedKey)
-				continue;
-			System.out.println("11GOT predecessor for key " +(n.getKey()- (((int)Math.pow(2,i-1))%maxkeyval))  +"   as  node with url "+ p.getURL() +" and key "+p.getKey());
-			try{
-				TTransport transport;
-				transport = new TSocket(p.getHostName(), p.getPort());
-				transport.open();
-				TProtocol protocol = new  TBinaryProtocol(transport);
-				AddService.Client client = new AddService.Client(protocol);
-				System.out.println("Calling update_finger_table inside "+ this.URL);
-				client.update_finger_table(n, i);
-			}
-			catch(TException e){
-					e.printStackTrace();
-			}
-
-
-		}
-		System.out.println("completed updateOthers");
-		try{
-			System.out.println("Trying to print finger table of 0");
-	  	TTransport transport2;
-			transport2 = new TSocket("localhost", 9000);
-			transport2.open();
-			TProtocol protocol2 = new  TBinaryProtocol(transport2);
-			AddService.Client client2 = new AddService.Client(protocol2);
-
-	  	client2.printFingerTable();
-				System.out.println("completed to print finger table of 0 after ujpdate otther");
-
-		}catch(TException E){
-			E.printStackTrace();
-		}
-
-
-	}
-
-	public void update_finger_table(Node s,  int i)   {
-		//s here is the new node
-		System.out.println("Inside update_finger_table of node "+this.nodeID+" with newly joined node id  "+ s.getKey() + "and URL " + s.getURL() +" for ith finger "+i);
-
-		if(this.nodecounter ==2 && this.nodeID==0){
-			  this.fingerTable.put(i,s);
-				this.fw.append("\n updated finger table for finger no "+ i+ s.getURL() );
-				this.fw.flush();
-				System.out.println("Updated entry "+i+" of finger table for node "+ this.nodeID+" with data "+ s.getURL());
-		}
-		else if( isbetWeen(s.getKey(), this.hashedKey , this.fingerTable.get(i).getKey() ) ) { //  s.getKey() >=this.hashedKey &&  s.getKey()< this.fingerTable.get(i).getKey()){
-			this.fingerTable.put(i, s);
-			this.fw.append("\n updated finger table for finger no "+ i+ s.getURL()+"\n" );
-			this.fw.flush();
-			System.out.println("Condition to update succeeded for node "+ this.nodeID);
-			Node p = this.predecessor;   // first node preceding the current node
-
-			try{
-				TTransport transport;
-				transport = new TSocket(p.hostName, p.port);
-				transport.open();
-				TProtocol protocol = new  TBinaryProtocol(transport);
-				AddService.Client client = new AddService.Client(protocol);
-
-				client.update_finger_table(s ,i);
-			}catch(TException e){
-
-			}
-
-		}
-		//return true;
-	}
-
-
 	public int fingerStart(int fromkey,  int fingernumber ){
-		long startpos =  ((fromkey + (((int)Math.pow(2, fingernumber-1)) % maxkeyval )) % maxkeyval);
+		long startpos =  (((long)fromkey + (((long)Math.pow(2, fingernumber-1)) % maxkeyval )) % maxkeyval);
 	  if(startpos<0){
-			System.out.println(" negative start position startpos "+startpos+"    maxkeyval : "+ maxkeyval);
-			System.out.println(" fromk key: "+fromkey+" plus "+(((int)Math.pow(2, fingernumber-1)) % maxkeyval  )+"   --- "+ ((int)Math.pow(2, fingernumber-1)) );
+			System.out.println(" NEGATIVE start position startpos "+startpos+"    maxkeyval : "+ maxkeyval+"  finger number "+ fingernumber);
+			System.out.println(" FROM key: "+fromkey+" plus "+(((int)Math.pow(2, fingernumber-1)) % maxkeyval  )+"   --- "+ ((int)Math.pow(2, fingernumber-1)) );
 		}
 			return (int)startpos;
 	//	return (fromkey + (((int)Math.pow(2, fingernumber-1)) % maxkeyval  ));
@@ -230,21 +151,7 @@ class ChordServiceHandler implements AddService.Iface
 
 
 
-	public Node closest_preceding_finger(int id){
-		for( int i =keyLength; i>0;i--){
-			int ithfingerid = this.fingerTable.get(i).getKey();
-			if( (ithfingerid > this.hashedKey && ithfingerid <= id)  || (ithfingerid <id && ithfingerid < this.hashedKey)){
-				System.out.println("Returning closest preceding finger from node "+ this.nodeID);
-				return this.fingerTable.get(i);
-			}
-		}
-
-		System.out.println("Returning default closest preceding finger ");
-		Node node = new Node( this.URL, this.hostName, this.port, this.hashedKey) ;
-		return node;
-	}
-
-	public Join_data join(String url){   // same functionality as init_finger_table code in algorithm
+	public Join_data join (String url){   // same functionality as init_finger_table code in algorithm
 		//nodeLock.lock();
 		this.nodecounter++;
 		try{
@@ -269,11 +176,11 @@ class ChordServiceHandler implements AddService.Iface
 
 			newnodeSuccessor  =finger1;  //= new Node ( Integer.parseInt(urlparts[1].split("/")[1]), finger1.split(":")[0]);
 
-			String host = newnodeSuccessor.getHostName();
-			int port = newnodeSuccessor.getPort();
+			String thost = newnodeSuccessor.getHostName();
+			int tport = newnodeSuccessor.getPort();
 			try{
 			TTransport transport;
-		    transport = new TSocket(host, port);
+		    transport = new TSocket(thost, tport);
 		    transport.open();
 		    TProtocol protocol = new  TBinaryProtocol(transport);
 		    AddService.Client client = new AddService.Client(protocol);
@@ -290,32 +197,40 @@ class ChordServiceHandler implements AddService.Iface
 		    //Node tempnode =
 
 		    temp_fingerTable.put(1, finger1);
+
+
 		    for ( int i =1;i<keyLength;i++){
 
-		    	if(fingerStart(newnodehashKey, i+1) >= this.hashedKey && fingerStart(newnodehashKey,i+1)<temp_fingerTable.get(i).getKey()){
+		    	if((fingerStart(newnodehashKey, i+1) >= this.hashedKey && fingerStart(newnodehashKey,i+1)<temp_fingerTable.get(i).getKey()) || (this.hashedKey > temp_fingerTable.get(i).getKey() && fingerStart(newnodehashKey,i+1) < temp_fingerTable.get(i).getKey())){
 		    		temp_fingerTable.put(i+1, temp_fingerTable.get(i));
+					//	System.out.println("")
 		    	}
 		    	else{
 						System.out.println("Finding "+(i+1) +" th finger for node with URL  "+url + "and ket  "+ newnodehashKey);
 		    		Node  temp = find_successor(fingerStart(newnodehashKey,i+1)); // find_successor and find_node are same
 		    		temp_fingerTable.put(i+1, temp);
 
+
 		    	}
 		    }
+
+				if(nodecounter==2 || (isbetWeen(newnodehashKey , this.hashedKey , this.successor.getKey())))
+				 {
+					 this.setSuccessor(url);
+					 System.out.println("Set successor for node "+ this.nodeID +" set to "+ url);
+
+				 }
+
 
 		    Join_data return_info = new Join_data(newnodehashKey, temp_fingerTable, newnodeSuccessor, newnodePredecessor);
 		  //  i feel its better if this call is made by new node which joined the network..
 
 		//	 System.out.println(" Calling updateOthers \n\n");
-			 if(nodecounter==2)
-			 	{
-					this.setSuccessor(url);
-					System.out.println("Set successor for node "+ this.nodeID +" set to "+ url);
 
-				}
+				//else{
+				//	if()
 
-
-
+				//}
 		  // this.updateOthers(newnode);
 		//	 System.out.println("Update others completed for node with id "+newnodeId  +" returning joininfo");
 		//	 this.printFingerTable();
@@ -329,7 +244,9 @@ class ChordServiceHandler implements AddService.Iface
 	}
 
    public boolean isbetWeen(int id, int node, int nsuccessor){
-		 if((id>node && id <=nsuccessor))
+		 if(node ==nsuccessor)
+		 		return true;
+		 else if((id>node && id <=nsuccessor))
 		 			return true;
 		else if( node> nsuccessor && id >=node)
 					return true;
@@ -339,6 +256,91 @@ class ChordServiceHandler implements AddService.Iface
 
 	 }
 
+	 public Node closest_preceding_finger(int id){
+		 for( int i =keyLength; i>0;i--){
+			 int ithfingerid = this.fingerTable.get(i).getKey();
+			 if( (ithfingerid > this.hashedKey && ithfingerid <= id)  || (ithfingerid <id && ithfingerid < this.hashedKey)){
+				 System.out.println("Returning closest preceding finger from node "+ this.nodeID);
+				 return this.fingerTable.get(i);
+			 }
+		 }
+		 System.out.println("Returning default closest preceding finger ");
+		 Node node = new Node( this.URL, this.hostName, this.port, this.hashedKey) ;
+		 return node;
+	 }
+
+
+	 public void updateOthers(Node n){
+		 for (int i =1 ;i<=	keyLength;i++){
+			 //this could be parallelized by using other node to call find_predecessor
+			 Node p = this.find_predecessor((n.getKey()- (((int)Math.pow(2,i-1))%maxkeyval)));
+
+				if(p.getKey()==this.hashedKey)
+				   continue;
+			 System.out.println("11GOT predecessor for key " +(n.getKey()- (((int)Math.pow(2,i-1))%maxkeyval))  +"   as  node with url "+ p.getURL() +" and key "+p.getKey());
+			 try{
+				 TTransport transport;
+				 transport = new TSocket(p.getHostName(), p.getPort());
+				 transport.open();
+				 TProtocol protocol = new  TBinaryProtocol(transport);
+				 AddService.Client client = new AddService.Client(protocol);
+				 System.out.println("Calling update_finger_table inside "+ this.URL);
+				 client.update_finger_table(n, i);
+			 }
+			 catch(TException e){
+					 e.printStackTrace();
+			 }
+		 }
+		 System.out.println("completed updateOthers");
+		 try{
+			 System.out.println("Trying to print finger table of 0");
+			 TTransport transport2;
+			 transport2 = new TSocket("localhost", 9000);
+			 transport2.open();
+			 TProtocol protocol2 = new  TBinaryProtocol(transport2);
+			 AddService.Client client2 = new AddService.Client(protocol2);
+			 client2.printFingerTable();
+				 System.out.println("completed to print finger table of 0 after ujpdate otther");
+
+		 }catch(TException E){
+			 E.printStackTrace();
+		 }
+	 }
+
+
+
+  public void update_finger_table(Node s,  int i)   {
+		 //s here is the new node
+		 System.out.println("Inside update_finger_table of node "+this.nodeID+" with newly joined node id  "+ s.getKey() + "and URL " + s.getURL() +" for ith finger "+i);
+
+		 if(this.nodecounter ==2 && this.nodeID==0){
+				 this.fingerTable.put(i,s);
+				 this.fw.append("\n updated finger table for finger no "+ i+ s.getURL() );
+				 this.fw.flush();
+				 System.out.println("Updated entry "+i+" of finger table for node "+ this.nodeID+" with data "+ s.getURL());
+		 }
+		 else if( isbetWeen(s.getKey(), this.hashedKey , this.fingerTable.get(i).getKey() ) ) { //  s.getKey() >=this.hashedKey &&  s.getKey()< this.fingerTable.get(i).getKey())
+			 this.fingerTable.put(i, s);
+			 this.successor = this.fingerTable.get(1);
+			 this.fw.append("\n updated finger table for finger no "+ i+ s.getURL()+"\n" );
+			 this.fw.flush();
+			 System.out.println("Condition to update succeeded for node "+ this.nodeID);
+			 Node p = this.predecessor;   // first node preceding the current node
+
+			 try{
+				 TTransport transport;
+				 transport = new TSocket(p.hostName, p.port);
+				 transport.open();
+				 TProtocol protocol = new  TBinaryProtocol(transport);
+				 AddService.Client client = new AddService.Client(protocol);
+
+				 client.update_finger_table(s ,i);
+			 }catch(TException e){
+
+			 }
+		 //return true;
+	 }
+	}
 
    public Node find_predecessor(int id){
 		 int tempport=0;
@@ -379,7 +381,7 @@ class ChordServiceHandler implements AddService.Iface
 		 	 System.out.println("recieved successor of nprime for key " + id + " result is " + tempnprimeid+" and closest preceding finger is url "+ nprime.getURL() );
 			 System.out.println("successortemp "+successortemp.getKey());
 		while(!(isbetWeen(temphashid, nprime.getKey(), successortemp.getKey()))){
-	  // while(!((temphashid>nprime.getKey() && temphashid<= successortemp.getKey() ) || (temphashid >nprime.getKey() && temphashid <= successortemp.getKey() ) )){
+	  // while(!((temphashid>nprime.getKey() && temphashid<= successortemp.getKey() ) || (temphashid >nprime.getKey() && temphashid <= successortemp.getKey() ) ))
 
 			 System.out.println("Inside while loop" );
 		   temphost = nprime.hostName;
@@ -411,6 +413,7 @@ class ChordServiceHandler implements AddService.Iface
 			 }
 
 	   }
+
 	   return nprime;
    }
 
@@ -446,10 +449,5 @@ class ChordServiceHandler implements AddService.Iface
 	    	return nprime;
 
 	    }
-
-
 	}
-
-
-
 }

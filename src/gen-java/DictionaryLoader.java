@@ -25,7 +25,7 @@ public class DictionaryLoader {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Map<String,String> dictionary = new HashMap<String,String>();
-		String inputfile = args[0];
+		String inputfile = "sample-data.txt";
 		int noOfNodes = 8;
 
 		// reading class file
@@ -48,7 +48,7 @@ public class DictionaryLoader {
 				System.out.println(word+" ---------- "+ meaning);
 
 				String host = "localhost";
-				int port = 9001;
+				int port = 9000;
 
 				TTransport transport;
   		        transport = new TSocket(host, port);
