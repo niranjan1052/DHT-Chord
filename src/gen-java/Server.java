@@ -66,6 +66,7 @@ public class Server
     	  }
 				handler.setSuccessor(url);
 				handler.setPredecessor(url);
+
       }else{
 
     	 try{
@@ -92,7 +93,6 @@ public class Server
 				System.out.println("Update others completed for node with id "+ nodeID  +" returning joininfo");
 
 
-
     	 }
     	 catch(Exception e){
 
@@ -100,14 +100,15 @@ public class Server
 
       }
 
-			handler.printFingerTable();
 
+			handler.printFingerTable();
       processor = new AddService.Processor(handler);
 
       //Runnable simple = new Runnable()
       //{
        // public void run()
        // {
+
        someMethod(processor, port);
        // }
       //};
@@ -131,7 +132,9 @@ public class Server
       TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
       System.out.println("THRIFT SERVER STARTED");
 
+
       server.serve();
+
     }
     catch (Exception e)
     {

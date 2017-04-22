@@ -147,6 +147,8 @@ class ChordServiceHandler implements AddService.Iface
 			//this could be parallelized by using other node to call find_predecessor
 			Node p = this.find_predecessor((n.getKey()- (((int)Math.pow(2,i-1))%maxkeyval)));
 
+      if(p.getKey()==this.hashedKey)
+				continue;
 			System.out.println(" got predecessor for key " +(((int)Math.pow(2,i-1))%maxkeyval)  +"   as  node with url "+ p.getURL() +" and key "+p.getKey());
 			try{
 				TTransport transport;
@@ -162,6 +164,23 @@ class ChordServiceHandler implements AddService.Iface
 
 
 		}
+		System.out.println("completed updateOthers");
+		try{
+			System.out.println("Trying to print finger table of 0");
+	  	TTransport transport2;
+			transport2 = new TSocket("localhost", 9000);
+			transport2.open();
+			TProtocol protocol2 = new  TBinaryProtocol(transport2);
+			AddService.Client client2 = new AddService.Client(protocol2);
+
+	  	client2.printFingerTable();
+				System.out.println("completed to print finger table of 0 after ujpdate otther");
+
+		}catch(TException E){
+			E.printStackTrace();
+		}
+
+
 	}
 
 	public void update_finger_table(Node s,  int i)   {
@@ -201,7 +220,7 @@ class ChordServiceHandler implements AddService.Iface
 
 
 	public Node closest_preceding_finger(int id){
-		for( int i =keyLength; i>0;i++){
+		for( int i =keyLength; i>0;i--){
 			int ithfingerid = this.fingerTable.get(i).getKey();
 			if( (ithfingerid > this.hashedKey && ithfingerid <= id)  || (ithfingerid <id && ithfingerid < this.hashedKey)){
 				System.out.println("Returning closest preceding finger from node "+ this.nodeID);
@@ -209,7 +228,7 @@ class ChordServiceHandler implements AddService.Iface
 			}
 		}
 
-
+		System.out.println("Returning default closest preceding finger ");
 		Node node = new Node( this.URL, this.hostName, this.port, this.hashedKey) ;
 		return node;
 	}
@@ -288,7 +307,7 @@ class ChordServiceHandler implements AddService.Iface
 
 		  // this.updateOthers(newnode);
 		//	 System.out.println("Update others completed for node with id "+newnodeId  +" returning joininfo");
-			 this.printFingerTable();
+		//	 this.printFingerTable();
 			 System.out.println("predecessor of Node "+this.nodeID+" is "+ this.predecessor.getURL()+"   and predecessor key is "+ this.predecessor.getKey());
 		   return return_info;
 		}
@@ -330,7 +349,7 @@ class ChordServiceHandler implements AddService.Iface
 
 		 }
 
-
+		 System.out.println("recieved successor of nprime for key " +id );
 
 	   while(!(temphashid>nprime.getKey() && temphashid<= successortemp.getKey() )){
 		   host = nprime.hostName;
