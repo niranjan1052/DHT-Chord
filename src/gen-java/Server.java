@@ -22,7 +22,7 @@ public class Server
 
 	public static int getHashcode(String url){
 		int key = url.hashCode();
-		if(key<=0){
+		if(key<0){
 			key = key >>>1;
 		}
 		return key;

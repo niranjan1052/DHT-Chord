@@ -22,7 +22,7 @@ class ChordServiceHandler implements AddService.Iface
 {
 	public static int keyLength = 32;
 	public int nodecounter =1;
-	private int maxkeyval = (int)Math.pow(2, 32);
+	private int maxkeyval = (int)Math.pow(2, 31);
 	private int nodeID;
 	private String hostName;
 	private int port;
@@ -58,7 +58,7 @@ class ChordServiceHandler implements AddService.Iface
 
 	public int getHashcode(String url){
 		int key = url.hashCode();
-		if(key<=0){
+		if(key<0){
 			key = key >>>1;
 		}
 		return key;
@@ -149,13 +149,14 @@ class ChordServiceHandler implements AddService.Iface
 
       if(p.getKey()==this.hashedKey)
 				continue;
-			System.out.println(" got predecessor for key " +(((int)Math.pow(2,i-1))%maxkeyval)  +"   as  node with url "+ p.getURL() +" and key "+p.getKey());
+			System.out.println("11GOT predecessor for key " +(n.getKey()- (((int)Math.pow(2,i-1))%maxkeyval))  +"   as  node with url "+ p.getURL() +" and key "+p.getKey());
 			try{
 				TTransport transport;
 				transport = new TSocket(p.getHostName(), p.getPort());
 				transport.open();
 				TProtocol protocol = new  TBinaryProtocol(transport);
 				AddService.Client client = new AddService.Client(protocol);
+				System.out.println("Calling update_finger_table inside "+ this.URL);
 				client.update_finger_table(n, i);
 			}
 			catch(TException e){
@@ -189,10 +190,14 @@ class ChordServiceHandler implements AddService.Iface
 
 		if(this.nodecounter ==2 && this.nodeID==0){
 			  this.fingerTable.put(i,s);
+				this.fw.append("\n updated finger table for finger no "+ i+ s.getURL() );
+				this.fw.flush();
 				System.out.println("Updated entry "+i+" of finger table for node "+ this.nodeID+" with data "+ s.getURL());
 		}
-		else if(s.getKey() >=this.hashedKey &&  s.getKey()< this.fingerTable.get(i).getKey()){
+		else if( isbetWeen(s.getKey(), this.hashedKey , this.fingerTable.get(i).getKey() ) ) { //  s.getKey() >=this.hashedKey &&  s.getKey()< this.fingerTable.get(i).getKey()){
 			this.fingerTable.put(i, s);
+			this.fw.append("\n updated finger table for finger no "+ i+ s.getURL()+"\n" );
+			this.fw.flush();
 			System.out.println("Condition to update succeeded for node "+ this.nodeID);
 			Node p = this.predecessor;   // first node preceding the current node
 
@@ -214,7 +219,13 @@ class ChordServiceHandler implements AddService.Iface
 
 
 	public int fingerStart(int fromkey,  int fingernumber ){
-		return (fromkey + (((int)Math.pow(2, fingernumber-1)) % maxkeyval  ));
+		long startpos =  ((fromkey + (((int)Math.pow(2, fingernumber-1)) % maxkeyval )) % maxkeyval);
+	  if(startpos<0){
+			System.out.println(" negative start position startpos "+startpos+"    maxkeyval : "+ maxkeyval);
+			System.out.println(" fromk key: "+fromkey+" plus "+(((int)Math.pow(2, fingernumber-1)) % maxkeyval  )+"   --- "+ ((int)Math.pow(2, fingernumber-1)) );
+		}
+			return (int)startpos;
+	//	return (fromkey + (((int)Math.pow(2, fingernumber-1)) % maxkeyval  ));
 	}
 
 
@@ -285,7 +296,7 @@ class ChordServiceHandler implements AddService.Iface
 		    		temp_fingerTable.put(i+1, temp_fingerTable.get(i));
 		    	}
 		    	else{
-						System.out.println("Finding "+i +"th finger for node with URL  "+url + "and ket  "+ newnodehashKey);
+						System.out.println("Finding "+(i+1) +" th finger for node with URL  "+url + "and ket  "+ newnodehashKey);
 		    		Node  temp = find_successor(fingerStart(newnodehashKey,i+1)); // find_successor and find_node are same
 		    		temp_fingerTable.put(i+1, temp);
 
@@ -317,12 +328,23 @@ class ChordServiceHandler implements AddService.Iface
 
 	}
 
+   public boolean isbetWeen(int id, int node, int nsuccessor){
+		 if((id>node && id <=nsuccessor))
+		 			return true;
+		else if( node> nsuccessor && id >=node)
+					return true;
+		else if(node > nsuccessor && id < nsuccessor)
+					return true;
+		else return false;
+
+	 }
+
 
    public Node find_predecessor(int id){
-
+		 int tempport=0;
 		 System.out.println(" inside find_predecessor of node "+ this.nodeID +" to find predecessor for key " + id);
 	   int temphashid = id;
-	   String host;
+	   String temphost= "";
 	   Node nprime=null;
 		 if(nodecounter==2 && this.successor.getKey() == this.hashedKey ){
 			 return new Node( this.URL, this.hostName, this.port, this.hashedKey) ;
@@ -334,6 +356,8 @@ class ChordServiceHandler implements AddService.Iface
 	   }
 	   else{
 		   nprime = closest_preceding_finger(temphashid);
+			 if(nprime.getKey() == this.hashedKey)
+			 	return nprime;
 	   }
 		 Node successortemp =null;
 
@@ -349,22 +373,42 @@ class ChordServiceHandler implements AddService.Iface
 
 		 }
 
-		 System.out.println("recieved successor of nprime for key " +id );
 
-	   while(!(temphashid>nprime.getKey() && temphashid<= successortemp.getKey() )){
-		   host = nprime.hostName;
-		   port = nprime.port;
+		 int tempnprimeid = nprime.getKey();
+
+		 	 System.out.println("recieved successor of nprime for key " + id + " result is " + tempnprimeid+" and closest preceding finger is url "+ nprime.getURL() );
+			 System.out.println("successortemp "+successortemp.getKey());
+		while(!(isbetWeen(temphashid, nprime.getKey(), successortemp.getKey()))){
+	  // while(!((temphashid>nprime.getKey() && temphashid<= successortemp.getKey() ) || (temphashid >nprime.getKey() && temphashid <= successortemp.getKey() ) )){
+
+			 System.out.println("Inside while loop" );
+		   temphost = nprime.hostName;
+		   tempport = nprime.port;
 		   try{
 			   TTransport transport;
-			   transport = new TSocket(host, port);
+			   transport = new TSocket(temphost, tempport);
 			   transport.open();
 			   TProtocol protocol = new  TBinaryProtocol(transport);
 			   AddService.Client client = new AddService.Client(protocol);
 			   nprime = client.closest_preceding_finger(id);
-
+				 if(tempnprimeid == nprime.getKey())
+				 	break;
 		   }catch(TException e){
 
 		   }
+			 System.out.println("recieved successor of nprime for key " + id + "and temphostport"+tempport + "result is " + nprime.getKey() +" and closest preceding finger is url "+ nprime.getURL() );
+       // call nprime successor
+			 try{
+				 TTransport transport3;
+				 transport3 = new TSocket(nprime.getHostName(), nprime.getPort());
+				 transport3.open();
+				 TProtocol protocol3 = new  TBinaryProtocol(transport3);
+				 AddService.Client client3 = new AddService.Client(protocol3);
+				 successortemp = client3.getSuccessor();
+				 System.out.println("successortemp "+successortemp.getKey());
+			 }catch(TException e){
+
+			 }
 
 	   }
 	   return nprime;

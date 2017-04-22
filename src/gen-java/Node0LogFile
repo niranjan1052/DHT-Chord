@@ -31,3 +31,79 @@ FingerNo        FingerNodeURL             HashedKey1       localhost:9000/011804
 31       localhost:9000/01180445855
 30       localhost:9000/01180445855
 32       localhost:9000/01180445855
+
+ updated finger table for finger no 1localhost:9001/1
+ updated finger table for finger no 2localhost:9001/1
+ updated finger table for finger no 3localhost:9001/1
+ updated finger table for finger no 4localhost:9001/1
+ updated finger table for finger no 5localhost:9001/1
+ updated finger table for finger no 6localhost:9001/1
+ updated finger table for finger no 7localhost:9001/1
+ updated finger table for finger no 8localhost:9001/1
+ updated finger table for finger no 9localhost:9001/1
+ updated finger table for finger no 32localhost:9001/1printing fingerTable..
+FingerNo        FingerNodeURL             HashedKey1       localhost:9001/11180446336
+2       localhost:9001/11180446336
+3       localhost:9001/11180446336
+4       localhost:9001/11180446336
+5       localhost:9001/11180446336
+6       localhost:9001/11180446336
+7       localhost:9001/11180446336
+8       localhost:9001/11180446336
+9       localhost:9001/11180446336
+10       localhost:9000/01180445855
+11       localhost:9000/01180445855
+12       localhost:9000/01180445855
+13       localhost:9000/01180445855
+14       localhost:9000/01180445855
+15       localhost:9000/01180445855
+17       localhost:9000/01180445855
+16       localhost:9000/01180445855
+19       localhost:9000/01180445855
+18       localhost:9000/01180445855
+21       localhost:9000/01180445855
+20       localhost:9000/01180445855
+23       localhost:9000/01180445855
+22       localhost:9000/01180445855
+25       localhost:9000/01180445855
+24       localhost:9000/01180445855
+27       localhost:9000/01180445855
+26       localhost:9000/01180445855
+29       localhost:9000/01180445855
+28       localhost:9000/01180445855
+31       localhost:9000/01180445855
+30       localhost:9000/01180445855
+32       localhost:9001/11180446336
+printing fingerTable..
+FingerNo        FingerNodeURL             HashedKey1       localhost:9001/11180446336
+2       localhost:9001/11180446336
+3       localhost:9001/11180446336
+4       localhost:9001/11180446336
+5       localhost:9001/11180446336
+6       localhost:9001/11180446336
+7       localhost:9001/11180446336
+8       localhost:9001/11180446336
+9       localhost:9001/11180446336
+10       localhost:9000/01180445855
+11       localhost:9000/01180445855
+12       localhost:9000/01180445855
+13       localhost:9000/01180445855
+14       localhost:9000/01180445855
+15       localhost:9000/01180445855
+17       localhost:9000/01180445855
+16       localhost:9000/01180445855
+19       localhost:9000/01180445855
+18       localhost:9000/01180445855
+21       localhost:9000/01180445855
+20       localhost:9000/01180445855
+23       localhost:9000/01180445855
+22       localhost:9000/01180445855
+25       localhost:9000/01180445855
+24       localhost:9000/01180445855
+27       localhost:9000/01180445855
+26       localhost:9000/01180445855
+29       localhost:9000/01180445855
+28       localhost:9000/01180445855
+31       localhost:9000/01180445855
+30       localhost:9000/01180445855
+32       localhost:9001/11180446336
