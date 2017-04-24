@@ -16,7 +16,7 @@ Running instructions
   according to the number of servers needed to be joined in the network.
   
 * Once All the nodes are joined, Run the DictionaryLoader file                                                                  
-  java -cp ".:libs/libthrift-0.9.1.jar:libs/slf4j-api-1.7.12.jar" DictionaryLoader1
+  java -cp ".:libs/libthrift-0.9.1.jar:libs/slf4j-api-1.7.12.jar" DictionaryLoader
  
 * Now run the Client program to start lookup operations 
   java -cp ".:libs/libthrift-0.9.1.jar:libs/slf4j-api-1.7.12.jar" Client 
