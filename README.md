@@ -24,6 +24,7 @@ Running instructions
   
   
   // To generate thirft class files Execute Command from the src folder
+  
   thrift -r --gen java AddService.thrift
   
  
